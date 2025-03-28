@@ -1,308 +1,185 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Shuffle, Brain, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { getBibleBooks, getChapters, getVerses } from "@/lib/bibleData";
-import { BibleVerse } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { apiRequest } from '@/lib/api';
+import { BibleVerse } from '@/lib/types';
 
 interface VerseSelectorProps {
-  currentTranslation: string;
   onVerseSelect: (verse: BibleVerse) => void;
-  toggleAiContext: () => void;
+  currentTranslation: string;
 }
 
-const VerseSelector = ({
-  currentTranslation,
-  onVerseSelect,
-  toggleAiContext,
-}: VerseSelectorProps) => {
-  const [selectedBook, setSelectedBook] = useState<string>("");
-  const [selectedChapter, setSelectedChapter] = useState<string>("");
-  const [selectedVerse, setSelectedVerse] = useState<string>("");
-  const [directReference, setDirectReference] = useState<string>("");
-  const [selectorMode, setSelectorMode] = useState<string>("dropdown");
-  const { toast } = useToast();
+export function VerseSelector({ onVerseSelect, currentTranslation }: VerseSelectorProps) {
+  const [books, setBooks] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedBook, setSelectedBook] = useState<string>('');
+  const [chapters, setChapters] = useState<number[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [verses, setVerses] = useState<number[]>([]);
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
-  // Get all Bible books for the current translation
-  const { data: books } = useQuery({
-    queryKey: ["/api/books", currentTranslation],
-    queryFn: () => getBibleBooks(currentTranslation),
-    enabled: !!currentTranslation,
-  });
-
-  // Get chapters for selected book
-  const { data: chapters } = useQuery({
-    queryKey: ["/api/chapters", selectedBook],
-    queryFn: () => getChapters(selectedBook),
-    enabled: !!selectedBook,
-  });
-
-  // Get verses for selected chapter
-  const { data: verses } = useQuery({
-    queryKey: ["/api/verses", selectedBook, selectedChapter],
-    queryFn: () => getVerses(selectedBook, parseInt(selectedChapter)),
-    enabled: !!selectedBook && !!selectedChapter,
-  });
-
-  const handleBookChange = (value: string) => {
-    setSelectedBook(value);
-    setSelectedChapter("");
-    setSelectedVerse("");
-  };
-
-  const handleChapterChange = (value: string) => {
-    setSelectedChapter(value);
-    setSelectedVerse("");
-  };
-
-  const handleVerseChange = (value: string) => {
-    setSelectedVerse(value);
-  };
-
-  const handleDirectReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDirectReference(e.target.value);
-  };
-
-  const parseDirectReference = (ref: string): { book: string, chapter: string, verse: string } | null => {
-    // Try to match patterns like "John 3:16" or "Genesis 1:1-3" (we'll just take the first verse for ranges)
-    const match = ref.match(/^([a-zA-Z0-9\s]+)\s+(\d+):(\d+)(?:-\d+)?$/);
-
-    if (!match) return null;
-
-    const [, bookName, chapter, verse] = match;
-    const book = Object.entries(books || []).find(
-      ([, book]) => book.name.toLowerCase() === bookName.trim().toLowerCase()
-    )?.[1]?.id;
-
-    return book ? { book, chapter, verse } : null;
-  };
-
-  const handleDirectReferenceSubmit = async () => {
-    const parsedRef = parseDirectReference(directReference);
-
-    if (!parsedRef) {
-      toast({
-        title: "Invalid reference",
-        description: "Please enter a reference in the format 'Book 1:1' (e.g. 'John 3:16').",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedBook(parsedRef.book);
-    setSelectedChapter(parsedRef.chapter);
-    setSelectedVerse(parsedRef.verse);
-
-    // Now fetch the verse
-    try {
-      const response = await fetch(
-        `/api/verse/${currentTranslation}/${parsedRef.book}/${parsedRef.chapter}/${parsedRef.verse}`
-      );
-      if (response.ok) {
-        const verse = await response.json();
-        onVerseSelect(verse);
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch the requested verse.",
-          variant: "destructive",
+  // Fetch books from DRA translation
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await apiRequest<Array<{ id: string; name: string }>>({
+          url: `/api/books/DRA`,
+          method: 'GET'
         });
+        if (response) {
+          setBooks(response);
+        }
+      } catch (error) {
+        console.error('Error fetching Bible books:', error);
+      }
+    };
+    fetchBooks();
+  }, []);
+
+  // Fetch chapters when book is selected
+  useEffect(() => {
+    const fetchChapters = async () => {
+      if (!selectedBook) return;
+      try {
+        const response = await apiRequest<number[]>({
+          url: `/api/chapters/${selectedBook}`,
+          method: 'GET'
+        });
+        if (response) {
+          setChapters(response);
+          setSelectedChapter(null);
+          setVerses([]);
+          setSelectedVerse(null);
+        }
+      } catch (error) {
+        console.error(`Error fetching chapters for book ${selectedBook}:`, error);
+      }
+    };
+    fetchChapters();
+  }, [selectedBook]);
+
+  // Fetch verses when chapter is selected
+  useEffect(() => {
+    const fetchVerses = async () => {
+      if (!selectedBook || !selectedChapter) return;
+      try {
+        const response = await apiRequest<number[]>({
+          url: `/api/verses/${selectedBook}/${selectedChapter}`,
+          method: 'GET'
+        });
+        if (response) {
+          setVerses(response);
+          setSelectedVerse(null);
+        }
+      } catch (error) {
+        console.error(`Error fetching verses for ${selectedBook} ${selectedChapter}:`, error);
+      }
+    };
+    fetchVerses();
+  }, [selectedBook, selectedChapter]);
+
+  const handleVerseSelect = async () => {
+    if (!selectedBook || !selectedChapter || !selectedVerse) return;
+    try {
+      const verse = await apiRequest<BibleVerse>({
+        url: `/api/verse/${currentTranslation}/${selectedBook}/${selectedChapter}/${selectedVerse}`,
+        method: 'GET'
+      });
+      if (verse) {
+        onVerseSelect(verse);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while fetching the verse.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleGoClick = async () => {
-    if (!selectedBook || !selectedChapter || !selectedVerse) {
-      toast({
-        title: "Selection required",
-        description: "Please select a book, chapter, and verse.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `/api/verse/${currentTranslation}/${selectedBook}/${selectedChapter}/${selectedVerse}`
-      );
-      if (response.ok) {
-        const verse = await response.json();
-        onVerseSelect(verse);
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch the requested verse.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while fetching the verse.",
-        variant: "destructive",
-      });
+      console.error('Error fetching verse:', error);
     }
   };
 
   const handleRandomVerse = async () => {
     try {
-      const response = await fetch(`/api/random-verse/${currentTranslation}`);
-      if (response.ok) {
-        const verse = await response.json();
+      const verse = await apiRequest<BibleVerse>({
+        url: `/api/random-verse/${currentTranslation}`,
+        method: 'GET'
+      });
+      if (verse) {
         onVerseSelect(verse);
-
-        // Update the selectors to match the random verse
+        // Update selectors to match random verse
         setSelectedBook(verse.book);
-        setSelectedChapter(verse.chapter.toString());
-        setSelectedVerse(verse.verse.toString());
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch a random verse.",
-          variant: "destructive",
-        });
+        setSelectedChapter(verse.chapter);
+        setSelectedVerse(verse.verse);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while fetching a random verse.",
-        variant: "destructive",
-      });
+      console.error('Error fetching random verse:', error);
     }
   };
 
   return (
-    <Card className="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <CardContent className="p-0">
-        <Tabs value={selectorMode} onValueChange={setSelectorMode} className="mt-1 mb-4">
-          <TabsList className="grid w-full md:w-64 grid-cols-2">
-            <TabsTrigger value="dropdown">Dropdown Selection</TabsTrigger>
-            <TabsTrigger value="direct">Direct Input</TabsTrigger>
-          </TabsList>
+    <Tabs defaultValue="dropdown" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="dropdown">Select Verse</TabsTrigger>
+        <TabsTrigger value="random">Random Verse</TabsTrigger>
+      </TabsList>
 
-          <TabsContent value="dropdown" className="mt-2">
-            <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-              {/* Book, Chapter, Verse Selector */}
-              <div className="flex-grow flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">
-                <Select value={selectedBook} onValueChange={handleBookChange}>
-                  <SelectTrigger className="w-full md:w-auto">
-                    <SelectValue placeholder="Select Book" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {books?.map((book) => (
-                      <SelectItem key={book.id} value={book.id}>
-                        {book.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+      <TabsContent value="dropdown" className="mt-2">
+        <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+          <div className="flex-grow flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">
+            <Select value={selectedBook} onValueChange={setSelectedBook}>
+              <SelectTrigger className="w-full md:w-auto">
+                <SelectValue placeholder="Select Book" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {books.map((book) => (
+                  <SelectItem key={book.id} value={book.id.toLowerCase()}>
+                    {book.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-                <Select
-                  value={selectedChapter}
-                  onValueChange={handleChapterChange}
-                  disabled={!selectedBook}
-                >
-                  <SelectTrigger className="w-full md:w-[100px]">
-                    <SelectValue placeholder="Chapter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {chapters?.map((chapter) => (
-                      <SelectItem key={chapter} value={chapter.toString()}>
-                        {chapter}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <Select
+              value={selectedChapter?.toString() || ''}
+              onValueChange={(value) => setSelectedChapter(parseInt(value))}>
+              <SelectTrigger className="w-full md:w-auto" disabled={!selectedBook}>
+                <SelectValue placeholder="Chapter" />
+              </SelectTrigger>
+              <SelectContent>
+                {chapters.map((chapter) => (
+                  <SelectItem key={chapter} value={chapter.toString()}>
+                    {chapter}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-                <Select
-                  value={selectedVerse}
-                  onValueChange={handleVerseChange}
-                  disabled={!selectedChapter}
-                >
-                  <SelectTrigger className="w-full md:w-[100px]">
-                    <SelectValue placeholder="Verse" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {verses?.map((verse) => (
-                      <SelectItem key={verse} value={verse.toString()}>
-                        {verse}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  onClick={handleGoClick}
-                  className="bg-primary text-white hover:bg-primary/90 w-full md:w-auto"
-                >
-                  Go
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="direct" className="mt-2">
-            <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-              <div className="flex-grow flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">
-                <div className="flex-grow flex items-center">
-                  <Input
-                    type="text"
-                    placeholder="Enter reference (e.g. John 3:16)"
-                    value={directReference}
-                    onChange={handleDirectReferenceChange}
-                    className="w-full md:w-auto flex-1"
-                  />
-                  <Button
-                    onClick={handleDirectReferenceSubmit}
-                    className="bg-primary text-white hover:bg-primary/90 ml-2"
-                  >
-                    <Search className="h-4 w-4 mr-1" />
-                    Go
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Action Buttons */}
-        <div className="flex space-x-2 md:justify-end">
-          <Button
-            onClick={handleRandomVerse}
-            className="bg-accent text-neutral-darkest hover:bg-accent/90 w-full md:w-auto flex items-center gap-2"
-          >
-            <Shuffle className="h-4 w-4" />
-            Random
-          </Button>
+            <Select
+              value={selectedVerse?.toString() || ''}
+              onValueChange={(value) => setSelectedVerse(parseInt(value))}>
+              <SelectTrigger className="w-full md:w-auto" disabled={!selectedChapter}>
+                <SelectValue placeholder="Verse" />
+              </SelectTrigger>
+              <SelectContent>
+                {verses.map((verse) => (
+                  <SelectItem key={verse} value={verse.toString()}>
+                    {verse}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <Button
-            onClick={toggleAiContext}
-            className="bg-secondary text-black hover:bg-secondary/90 w-full md:w-auto flex items-center gap-2 font-medium"
-          >
-            <Brain className="h-4 w-4 text-black" />
-            AI Context
+            onClick={handleVerseSelect}
+            disabled={!selectedBook || !selectedChapter || !selectedVerse}>
+            Get Verse
           </Button>
         </div>
-      </CardContent>
-    </Card>
-  );
-};
+      </TabsContent>
 
-export default VerseSelector;
+      <TabsContent value="random" className="mt-2">
+        <div className="flex justify-center">
+          <Button onClick={handleRandomVerse} className="w-full md:w-auto">
+            Get Random Verse
+          </Button>
+        </div>
+      </TabsContent>
+    </Tabs>
+  );
+}
