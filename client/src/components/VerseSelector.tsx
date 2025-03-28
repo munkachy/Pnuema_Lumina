@@ -34,10 +34,11 @@ const VerseSelector = ({
   const [selectorMode, setSelectorMode] = useState<string>("dropdown");
   const { toast } = useToast();
 
-  // Get all Bible books
+  // Get all Bible books for the current translation
   const { data: books } = useQuery({
-    queryKey: ["/api/books"],
-    queryFn: getBibleBooks,
+    queryKey: ["/api/books", currentTranslation],
+    queryFn: () => getBibleBooks(currentTranslation),
+    enabled: !!currentTranslation,
   });
 
   // Get chapters for selected book

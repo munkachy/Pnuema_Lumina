@@ -40,54 +40,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get all Bible books with formatting
-  app.get("/api/books", (req, res) => {
+  // Get all Bible books with formatting for a specific translation
+  app.get("/api/books/:translation", async (req, res) => {
     try {
-      const books = Object.keys(book_name_mapping).map(displayName => {
-        const id = book_name_mapping[displayName];
-        
-        // Determine testament and group
-        let testament = "old";
-        let group = "law";
-        
-        if (["genesis", "exodus", "leviticus", "numbers", "deuteronomy"].includes(id)) {
-          group = "law";
-        } else if (["joshua", "judges", "ruth", "1samuel", "2samuel", "1kings", "2kings", 
-                   "1chronicles", "2chronicles", "ezra", "nehemiah", "esther"].includes(id)) {
-          group = "history";
-        } else if (["job", "psalms", "proverbs", "ecclesiastes", "songofsolomon"].includes(id)) {
-          group = "wisdom";
-        } else if (["isaiah", "jeremiah", "lamentations", "ezekiel", "daniel", 
-                   "hosea", "joel", "amos", "obadiah", "jonah", "micah", "nahum", 
-                   "habakkuk", "zephaniah", "haggai", "zechariah", "malachi"].includes(id)) {
-          group = "prophets";
-        } else if (["matthew", "mark", "luke", "john"].includes(id)) {
-          testament = "new";
-          group = "gospels";
-        } else if (id === "acts") {
-          testament = "new";
-          group = "history";
-        } else if (["romans", "1corinthians", "2corinthians", "galatians", "ephesians",
-                   "philippians", "colossians", "1thessalonians", "2thessalonians",
-                   "1timothy", "2timothy", "titus", "philemon", "hebrews", "james",
-                   "1peter", "2peter", "1john", "2john", "3john", "jude"].includes(id)) {
-          testament = "new";
-          group = "epistles";
-        } else if (id === "revelation") {
-          testament = "new";
-          group = "apocalyptic";
-        } else if (["tobit", "judith", "wisdom", "sirach", "baruch", "1maccabees", "2maccabees"].includes(id)) {
-          testament = "deuterocanonical";
-          group = "deuterocanonical";
+      const { translation } = req.params;
+      const translationId = getTranslationId(translation);
+      const response = await axios.get(
+        `${API_BIBLE_URL}/bibles/${translationId}/books`,
+        {
+          headers: {
+            "api-key": API_BIBLE_KEY
+          }
         }
-        
-        return {
-          id,
-          name: displayName,
-          testament,
-          group
-        };
-      });
+      );
+      
+      const books = response.data.data.map((book: any) => ({
+        id: book.id,
+        name: book.name,
+        testament: book.testament?.toLowerCase() || "unknown",
+        group: book.category?.toLowerCase() || "unknown"
+      }));
       
       res.json(books);
     } catch (error) {
