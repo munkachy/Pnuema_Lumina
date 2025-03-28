@@ -86,7 +86,7 @@ const VerseDisplay = ({ verse, onNavigate }: VerseDisplayProps) => {
     if (!isComparing) {
       try {
         // Get the other translations of this verse
-        const translations = ["DRA", "NRSVCE", "NABRE", "GNT"].filter(
+        const translations = ["DRA", "GNT"].filter(
           t => t !== verse.translation
         );
         

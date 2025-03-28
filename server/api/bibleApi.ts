@@ -8,10 +8,8 @@ const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
 // Map our internal translation IDs to API.Bible IDs
 // These IDs have been verified to work with the API
 const TRANSLATION_MAP = {
-  "GNT": "65eec8e0b60e656b-01", // Good News Translation
   "DRA": "179568874c45066f-01", // Douay-Rheims (Default)
-  "NRSVCE": "40072c4a4bff4197-01", // NRSV Catholic Edition
-  "NABRE": "1b3c4f196c733694-01" // New American Bible Revised Edition
+  "GNT": "65eec8e0b60e656b-01" // Good News Translation
 };
 
 // Map book names to API.Bible book IDs

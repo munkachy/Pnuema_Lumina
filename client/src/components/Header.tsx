@@ -31,8 +31,6 @@ const Header = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="DRA">Douay-Rheims (DRA)</SelectItem>
-              <SelectItem value="NRSVCE">NRSV Catholic Edition</SelectItem>
-              <SelectItem value="NABRE">New American Bible Revised Ed.</SelectItem>
               <SelectItem value="GNT">Good News Translation (GNT)</SelectItem>
             </SelectContent>
           </Select>
