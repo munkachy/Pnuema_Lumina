@@ -18,8 +18,9 @@ export const getBibleBooks = async (translation: string): Promise<BibleBook[]> =
 // Function to get all chapters for a book from the server API
 export const getChapters = async (bookId: string): Promise<number[]> => {
   try {
+    // Get chapter count from bible_verse_counts
     const response = await apiRequest<number[]>({
-      url: `/api/chapters/${bookId}`,
+      url: `/api/chapters/${bookId.toLowerCase()}`,
       method: "GET"
     });
     return response || [];

@@ -75,9 +75,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/chapters/:book", (req, res) => {
     try {
       const { book } = req.params;
-      const bookData = bible_verse_counts[book];
+      const bookId = book.toLowerCase();
+      const bookData = bible_verse_counts[bookId];
       
       if (!bookData) {
+        console.error(`Book not found: ${bookId}`);
         return res.status(404).json({ message: "Book not found" });
       }
       

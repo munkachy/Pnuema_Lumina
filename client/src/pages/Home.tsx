@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { BibleVerse } from "@/lib/types";
 
 const Home = () => {
-  const [currentTranslation, setCurrentTranslation] = useState<string>("NRSV-CE"); // Changed default to NRSV-CE since GNT was having issues
+  const [currentTranslation, setCurrentTranslation] = useState<string>("DRA"); 
   const [currentVerse, setCurrentVerse] = useState<BibleVerse | null>(null);
   const [showAiContext, setShowAiContext] = useState<boolean>(false);
 
