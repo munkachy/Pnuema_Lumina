@@ -2,10 +2,10 @@ import { BibleBook } from "@/lib/types";
 import { apiRequest } from "./queryClient";
 
 // Function to get all Bible books from the server API
-export const getBibleBooks = async (): Promise<BibleBook[]> => {
+export const getBibleBooks = async (translation: string): Promise<BibleBook[]> => {
   try {
     const response = await apiRequest<BibleBook[]>({
-      url: "/api/books",
+      url: `/api/books/${translation}`,
       method: "GET"
     });
     return response || [];
