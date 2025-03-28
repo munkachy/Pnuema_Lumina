@@ -3,7 +3,7 @@ import { BibleVerse } from "@shared/schema";
 import { get_verse_location, TOTAL_VERSES } from "../util/bibleData";
 
 // We'll use the API.Bible service which provides access to multiple Bible translations
-const API_BIBLE_KEY = process.env.API_BIBLE_KEY || "6da9b0a5a83ff5d49a19d8a7dbd1c6e4";
+const API_BIBLE_KEY = process.env.API_BIBLE_KEY;
 const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
 
 // Map our internal translation IDs to API.Bible IDs
@@ -122,11 +122,15 @@ export async function getBibleVerse(
       }
     );
     
+    // Extract the verse content from the API response
+    // The content comes as HTML, so we'll keep it that way for proper formatting
+    const verseContent = response.data.data.content;
+    
     return {
       book,
       chapter,
       verse,
-      text: response.data.data.content,
+      text: verseContent,
       translation
     };
   } catch (error) {

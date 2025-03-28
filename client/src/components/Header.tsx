@@ -31,7 +31,7 @@ const Header = ({
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-medium">Scripture Seeker</h1>
+          <h1 className="text-xl font-medium bg-gradient-to-r from-blue-300 to-purple-400 text-transparent bg-clip-text">Pneuma Lumina</h1>
         </div>
         <div>
           <Select
