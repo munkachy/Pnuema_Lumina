@@ -293,9 +293,9 @@ const VerseSelector = ({
 
           <Button
             onClick={toggleAiContext}
-            className="bg-secondary text-slate-100 hover:bg-secondary/90 w-full md:w-auto flex items-center gap-2 font-medium"
+            className="bg-secondary text-black hover:bg-secondary/90 w-full md:w-auto flex items-center gap-2 font-medium"
           >
-            <Brain className="h-4 w-4" />
+            <Brain className="h-4 w-4 text-black" />
             AI Context
           </Button>
         </div>

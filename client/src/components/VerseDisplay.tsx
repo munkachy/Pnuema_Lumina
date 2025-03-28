@@ -11,6 +11,12 @@ interface VerseDisplayProps {
   onNavigate: (direction: "next" | "previous") => void;
 }
 
+// Function to clean verse text by removing the verse number
+const cleanVerseText = (text: string): string => {
+  // Common pattern: digit(s) followed by a space or special characters at the beginning
+  return text.replace(/^\s*\d+\s+/, '');
+};
+
 const VerseDisplay = ({ verse, onNavigate }: VerseDisplayProps) => {
   const { toast } = useToast();
   const [isComparing, setIsComparing] = useState(false);
@@ -144,7 +150,7 @@ const VerseDisplay = ({ verse, onNavigate }: VerseDisplayProps) => {
 
       <CardContent className="p-4 md:p-6">
         <div className="verse-content font-serif text-lg leading-relaxed" 
-             dangerouslySetInnerHTML={{ __html: verse.text }} />
+             dangerouslySetInnerHTML={{ __html: cleanVerseText(verse.text) }} />
         
         {isComparing && otherTranslations.length > 0 && (
           <div className="mt-6 space-y-4">
@@ -155,7 +161,7 @@ const VerseDisplay = ({ verse, onNavigate }: VerseDisplayProps) => {
               <div key={idx} className="mt-4">
                 <h4 className="font-medium text-neutral-600 mb-2">{v.translation}</h4>
                 <div className="font-serif text-lg leading-relaxed"
-                     dangerouslySetInnerHTML={{ __html: v.text }} />
+                     dangerouslySetInnerHTML={{ __html: cleanVerseText(v.text) }} />
               </div>
             ))}
           </div>

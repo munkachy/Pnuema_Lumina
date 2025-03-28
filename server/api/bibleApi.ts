@@ -8,7 +8,7 @@ const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
 
 // Map our internal translation IDs to API.Bible IDs
 const TRANSLATION_MAP = {
-  "GNT": "296a112c45d5962a-01", // Good News Translation (use this ID instead of the one that's giving 403 errors)
+  "GNT": "61fd76eafa1577c2-01", // Good News Translation (Updated ID)
   "NRSV-CE": "40072c4a5aba4022-01", // New Revised Standard Version Catholic Edition
   "DRA": "179568874c45066f-01" // Douay-Rheims
 };
@@ -140,18 +140,40 @@ export async function getBibleVerse(
 }
 
 /**
- * Get a random Bible verse
+ * Get a random Bible verse, ensuring a truly random selection from the entire Bible
  */
 export async function getRandomVerse(translation: string): Promise<BibleVerse> {
   try {
-    // Use the BIBLE_VERSE_INDEX from the attached assets to pick a random verse
+    // Use a direct numerical approach to get a random verse from the entire Bible
+    // This ensures verses are picked with equal probability regardless of book size
     const randomVerseNum = Math.floor(Math.random() * TOTAL_VERSES) + 1;
     const [book, chapter, verse] = get_verse_location(randomVerseNum);
     
+    // Log the selected verse for debugging
+    console.log(`Selected random verse: ${book} ${chapter}:${verse} (verse #${randomVerseNum}/${TOTAL_VERSES})`);
+    
+    // Attempt to fetch the verse
     return await getBibleVerse(translation, book, chapter, verse);
   } catch (error) {
-    console.error("Error fetching random verse:", error);
-    throw new Error("Failed to fetch random verse");
+    // If we encounter an error, try another random verse as a fallback
+    console.error("Error fetching random verse, trying another one:", error);
+    
+    // Try a different verse from the New Testament (verses 23069 to 30564)
+    // This increases the chance of success since most translations have the NT
+    const ntStart = 23069; // Matthew 1:1
+    const ntEnd = 30564;   // Revelation 3:22
+    const randomNTVerseNum = Math.floor(Math.random() * (ntEnd - ntStart + 1)) + ntStart;
+    
+    try {
+      const [fallbackBook, fallbackChapter, fallbackVerse] = get_verse_location(randomNTVerseNum);
+      console.log(`Fallback random verse: ${fallbackBook} ${fallbackChapter}:${fallbackVerse}`);
+      return await getBibleVerse(translation, fallbackBook, fallbackChapter, fallbackVerse);
+    } catch (fallbackError) {
+      console.error("Failed to fetch fallback random verse:", fallbackError);
+      
+      // Last resort: Return a hardcoded known-good verse if all random attempts fail
+      return await getBibleVerse(translation, "john", 3, 16);
+    }
   }
 }
 
