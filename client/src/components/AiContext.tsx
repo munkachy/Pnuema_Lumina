@@ -93,11 +93,21 @@ const AiContext = ({ book, chapter, verse }: AiContextProps) => {
         </div>
         <div className="flex items-center gap-2">
           <Select value={persona} onValueChange={handlePersonaChange}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Select persona" />
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select AI Voice" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="Jesus">Jesus</SelectItem>
+              <SelectItem value="Old Testament Typology">OT Typology</SelectItem>
+              <SelectItem value="Koine Greek Expert">Greek Expert</SelectItem>
+              <SelectItem value="Hebrew Expert">Hebrew Expert</SelectItem>
+              <SelectItem value="Bishop Barron">Bishop Barron</SelectItem>
+              <SelectItem value="C.S. Lewis">C.S. Lewis</SelectItem>
+              <SelectItem value="Church Father">Church Father</SelectItem>
+              <SelectItem value="Desert Father">Desert Father</SelectItem>
+              <SelectItem value="Augustine">Augustine</SelectItem>
+              <SelectItem value="St. Thomas Aquinas">St. Thomas Aquinas</SelectItem>
               <SelectItem value="theologian">Theologian</SelectItem>
               <SelectItem value="historian">Historian</SelectItem>
               <SelectItem value="pastor">Pastor</SelectItem>

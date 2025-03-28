@@ -8,7 +8,7 @@ const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
 
 // Map our internal translation IDs to API.Bible IDs
 const TRANSLATION_MAP = {
-  "GNT": "61fd76eafa1577c2-02", // Good News Translation
+  "GNT": "296a112c45d5962a-01", // Good News Translation (use this ID instead of the one that's giving 403 errors)
   "NRSV-CE": "40072c4a5aba4022-01", // New Revised Standard Version Catholic Edition
   "DRA": "179568874c45066f-01" // Douay-Rheims
 };
