@@ -75,11 +75,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/chapters/:book", (req, res) => {
     try {
       const { book } = req.params;
-      const bookId = book.toLowerCase();
+      // Map from API.Bible ID format to our internal format
+      const bookMappings: { [key: string]: string } = {
+        'GEN': 'genesis',
+        'EXO': 'exodus',
+        'LEV': 'leviticus',
+        'NUM': 'numbers',
+        'DEU': 'deuteronomy',
+        'PSA': 'psalms',
+        // Add other mappings as needed
+      };
+      
+      const bookId = bookMappings[book] || book.toLowerCase();
       const bookData = bible_verse_counts[bookId];
       
       if (!bookData) {
-        console.error(`Book not found: ${bookId}`);
+        console.error(`Book not found: ${book} (mapped to ${bookId})`);
         return res.status(404).json({ message: "Book not found" });
       }
       
