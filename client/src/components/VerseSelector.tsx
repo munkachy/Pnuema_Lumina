@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { getBibleBooks, getChapters, getVerses } from '@/lib/bibleData';
-import { BibleBook } from '@/lib/types';
+
+import { useState, useEffect } from "react";
+import { getBibleBooks, getChapters, getVerses } from "@/lib/bibleData";
+import { BibleBook } from "@/lib/types";
 
 interface VerseSelectorProps {
   translation: string;
@@ -17,8 +18,12 @@ const VerseSelector = ({ translation, onVerseSelect }: VerseSelectorProps) => {
 
   useEffect(() => {
     const loadBooks = async () => {
-      const bibleBooks = await getBibleBooks(translation);
-      setBooks(bibleBooks);
+      try {
+        const bibleBooks = await getBibleBooks(translation);
+        setBooks(bibleBooks);
+      } catch (error) {
+        console.error("Error fetching Bible books:", error);
+      }
     };
     loadBooks();
   }, [translation]);
@@ -26,10 +31,14 @@ const VerseSelector = ({ translation, onVerseSelect }: VerseSelectorProps) => {
   useEffect(() => {
     const loadChapters = async () => {
       if (selectedBook) {
-        const bookChapters = await getChapters(selectedBook);
-        setChapters(bookChapters);
-        setSelectedChapter(0);
-        setVerses([]);
+        try {
+          const bookChapters = await getChapters(selectedBook);
+          setChapters(bookChapters);
+          setSelectedChapter(0);
+          setVerses([]);
+        } catch (error) {
+          console.error(`Error fetching chapters for book ${selectedBook}:`, error);
+        }
       }
     };
     loadChapters();
@@ -38,8 +47,12 @@ const VerseSelector = ({ translation, onVerseSelect }: VerseSelectorProps) => {
   useEffect(() => {
     const loadVerses = async () => {
       if (selectedBook && selectedChapter) {
-        const chapterVerses = await getVerses(selectedBook, selectedChapter);
-        setVerses(chapterVerses);
+        try {
+          const chapterVerses = await getVerses(selectedBook, selectedChapter);
+          setVerses(chapterVerses);
+        } catch (error) {
+          console.error(`Error fetching verses for ${selectedBook} ${selectedChapter}:`, error);
+        }
       }
     };
     loadVerses();
@@ -62,7 +75,7 @@ const VerseSelector = ({ translation, onVerseSelect }: VerseSelectorProps) => {
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 mb-6">
       <select
         value={selectedBook}
         onChange={handleBookChange}

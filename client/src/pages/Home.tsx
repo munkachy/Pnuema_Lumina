@@ -90,9 +90,8 @@ const Home = () => {
       <div className="flex flex-grow">
         <main className="flex-grow p-4 md:p-6">
           <VerseSelector
-            currentTranslation={currentTranslation}
+            translation={currentTranslation}
             onVerseSelect={handleVerseSelect}
-            toggleAiContext={toggleAiContext}
           />
 
           {currentVerse && (
