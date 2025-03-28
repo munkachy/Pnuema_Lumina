@@ -13,8 +13,25 @@ interface VerseDisplayProps {
 
 // Function to clean verse text by removing the verse number
 const cleanVerseText = (text: string): string => {
-  // Common pattern: digit(s) followed by a space or special characters at the beginning
-  return text.replace(/^\s*\d+\s+/, '');
+  if (!text) return '';
+  
+  // First try to match a verse number pattern inside HTML tag like "<p>12 "
+  let cleaned = text.replace(/^<p>\s*\d+\s+/, '<p>');
+  
+  // If that didn't work (no change), try without the HTML tag
+  if (cleaned === text) {
+    cleaned = text.replace(/^\s*\d+\s+/, '');
+  }
+  
+  // Try matching patterns like "12 " at the beginning of the content
+  if (cleaned === text) {
+    const matches = text.match(/^(\d+\s+)(.*)$/);
+    if (matches && matches.length > 2) {
+      cleaned = matches[2];
+    }
+  }
+  
+  return cleaned;
 };
 
 const VerseDisplay = ({ verse, onNavigate }: VerseDisplayProps) => {
