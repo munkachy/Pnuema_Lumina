@@ -8,7 +8,7 @@ const Footer = () => {
           <Book className="h-4 w-4" />
           <p>Scripture Seeker uses the API.Bible for verse data. No web scraping involved.</p>
         </div>
-        <p>Translations available: GNT, NRSV-CE, and Douay-Rheims</p>
+        <p>Translations available: GNT, NRSV, and Douay-Rheims (Catholic)</p>
       </div>
     </footer>
   );
