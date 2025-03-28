@@ -9,7 +9,7 @@ const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
 // These IDs have been verified to work with the API
 const TRANSLATION_MAP = {
   "GNT": "65eec8e0b60e656b-01", // Good News Translation (Verified ID)
-  "NRSV-CE": "40072c4a5aba4022-01", // New Revised Standard Version Catholic Edition
+  "NRSV-CE": "40072c4a4bff4197-01", // New Revised Standard Version Catholic Edition
   "DRA": "179568874c45066f-01" // Douay-Rheims
 };
 
@@ -94,26 +94,26 @@ const BOOK_ID_MAP: Record<string, string> = {
 // Function to clean the verse text by removing the verse number
 const cleanVerseText = (text: string): string => {
   if (!text) return '';
-  
+
   // First try to match verse numbers within HTML tags like "<p>12..."
   let cleaned = text.replace(/^<p>\s*\d+/, '<p>');
-  
+
   // Try to match patterns like "12In the beginning" (no space after number)
   cleaned = cleaned.replace(/^<p>(\d+)([A-Za-z])/, '<p>$2');
-  
+
   // If that didn't work (no change), try without the HTML tag
   if (cleaned === text) {
     cleaned = text.replace(/^\s*\d+\s*/, '');
   }
-  
+
   // Try matching patterns like "12In the..." (no space after number)
   if (cleaned === text) {
     cleaned = text.replace(/^(\d+)([A-Za-z])/, '$2');
   }
-  
+
   // General cleaning of any remnant digit at the beginning
   cleaned = cleaned.replace(/^(\d+)/, '');
-  
+
   return cleaned;
 };
 
@@ -131,12 +131,12 @@ export async function getBibleVerse(
     if (!translationId) {
       throw new Error(`Translation '${translation}' not found`);
     }
-    
+
     const bookId = BOOK_ID_MAP[book.toLowerCase()];
     if (!bookId) {
       throw new Error(`Book '${book}' not found`);
     }
-    
+
     const response = await axios.get(
       `${API_BIBLE_URL}/bibles/${translationId}/verses/${bookId}.${chapter}.${verse}`,
       {
@@ -145,14 +145,14 @@ export async function getBibleVerse(
         }
       }
     );
-    
+
     // Extract the verse content from the API response
     // The content comes as HTML, so we'll keep it that way for proper formatting
     let verseContent = response.data.data.content;
-    
+
     // Clean the verse content to remove the verse number
     verseContent = cleanVerseText(verseContent);
-    
+
     return {
       book,
       chapter,
@@ -176,7 +176,7 @@ export async function getRandomVerse(translation: string): Promise<BibleVerse> {
     if (!translationId) {
       throw new Error(`Translation '${translation}' not found`);
     }
-    
+
     // 1. Get all the books available in this translation
     const booksResponse = await axios.get(
       `${API_BIBLE_URL}/bibles/${translationId}/books`,
@@ -186,12 +186,12 @@ export async function getRandomVerse(translation: string): Promise<BibleVerse> {
         }
       }
     );
-    
+
     const books = booksResponse.data.data;
-    
+
     // 2. Select a random book
     const randomBook = books[Math.floor(Math.random() * books.length)];
-    
+
     // 3. Get all the chapters in the selected book
     const chaptersResponse = await axios.get(
       `${API_BIBLE_URL}/bibles/${translationId}/books/${randomBook.id}/chapters`,
@@ -201,15 +201,15 @@ export async function getRandomVerse(translation: string): Promise<BibleVerse> {
         }
       }
     );
-    
+
     const chapters = chaptersResponse.data.data;
-    
+
     // Skip the intro chapter if it exists (usually chapter id with 'intro')
     const filteredChapters = chapters.filter((ch: any) => !ch.id.includes('intro'));
-    
+
     // 4. Select a random chapter
     const randomChapter = filteredChapters[Math.floor(Math.random() * filteredChapters.length)];
-    
+
     // 5. Get all the verses in the selected chapter
     const versesResponse = await axios.get(
       `${API_BIBLE_URL}/bibles/${translationId}/chapters/${randomChapter.id}/verses`,
@@ -219,12 +219,12 @@ export async function getRandomVerse(translation: string): Promise<BibleVerse> {
         }
       }
     );
-    
+
     const verses = versesResponse.data.data;
-    
+
     // 6. Select a random verse
     const randomVerse = verses[Math.floor(Math.random() * verses.length)];
-    
+
     // 7. Now get the content of the random verse
     const verseResponse = await axios.get(
       `${API_BIBLE_URL}/bibles/${translationId}/verses/${randomVerse.id}`,
@@ -234,27 +234,27 @@ export async function getRandomVerse(translation: string): Promise<BibleVerse> {
         }
       }
     );
-    
+
     const verseData = verseResponse.data.data;
-    
+
     // 8. Extract book, chapter and verse from the reference
     // Format is typically like: "GEN.1.1" or similar
     const refParts = randomVerse.id.split('.');
-    
+
     // Find the book name from our mapping
     const bookId = refParts[0];
     const bookName = Object.keys(BOOK_ID_MAP).find(
       key => BOOK_ID_MAP[key] === bookId
     ) || randomBook.name.toLowerCase();
-    
+
     const chapterNum = parseInt(refParts[1]);
     const verseNum = parseInt(refParts[2]);
-    
+
     console.log(`Selected random verse: ${bookName} ${chapterNum}:${verseNum}`);
-    
+
     // Clean the verse content to remove the verse number
     const cleanedContent = cleanVerseText(verseData.content);
-    
+
     return {
       book: bookName,
       chapter: chapterNum,
@@ -264,7 +264,7 @@ export async function getRandomVerse(translation: string): Promise<BibleVerse> {
     };
   } catch (error) {
     console.error("Error fetching random verse:", error);
-    
+
     // Fallback to a known good verse
     try {
       console.log("Falling back to John 3:16");
@@ -285,7 +285,7 @@ export async function searchBibleVerses(translation: string, query: string): Pro
     if (!translationId) {
       throw new Error(`Translation '${translation}' not found`);
     }
-    
+
     const response = await axios.get(
       `${API_BIBLE_URL}/bibles/${translationId}/search?query=${encodeURIComponent(query)}&limit=10`,
       {
@@ -294,7 +294,7 @@ export async function searchBibleVerses(translation: string, query: string): Pro
         }
       }
     );
-    
+
     return response.data.data.verses.map((verse: any) => {
       const text = cleanVerseText(verse.text);
       return {
