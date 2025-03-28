@@ -30,9 +30,10 @@ const Header = ({
               <SelectValue placeholder="Select translation" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="GNT">Good News Translation (GNT)</SelectItem>
-              <SelectItem value="ASV">American Standard Version (ASV)</SelectItem>
               <SelectItem value="DRA">Douay-Rheims (DRA)</SelectItem>
+              <SelectItem value="NRSVCE">NRSV Catholic Edition</SelectItem>
+              <SelectItem value="NABRE">New American Bible Revised Ed.</SelectItem>
+              <SelectItem value="GNT">Good News Translation (GNT)</SelectItem>
             </SelectContent>
           </Select>
         </div>
