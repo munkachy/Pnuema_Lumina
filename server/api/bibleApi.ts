@@ -1,12 +1,4 @@
 import axios from "axios";
-
-export function getTranslationId(translation: string): string {
-  const translationMap: { [key: string]: string } = {
-    'DRA': '179568874c45066f-01', // Douay-Rheims American
-    'GNT': '61fd76eafa1577c2-02', // Good News Translation
-  };
-  return translationMap[translation] || translationMap['DRA'];
-}
 import { BibleVerse } from "@shared/schema";
 
 // We'll use the API.Bible service which provides access to multiple Bible translations

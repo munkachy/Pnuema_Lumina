@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { BibleVerse } from "@/lib/types";
 
 const Home = () => {
-  const [currentTranslation, setCurrentTranslation] = useState<string>("DRA"); 
+  const [currentTranslation, setCurrentTranslation] = useState<string>("NRSV-CE"); // Changed default to NRSV-CE since GNT was having issues
   const [currentVerse, setCurrentVerse] = useState<BibleVerse | null>(null);
   const [showAiContext, setShowAiContext] = useState<boolean>(false);
 
@@ -90,8 +90,9 @@ const Home = () => {
       <div className="flex flex-grow">
         <main className="flex-grow p-4 md:p-6">
           <VerseSelector
-            translation={currentTranslation}
+            currentTranslation={currentTranslation}
             onVerseSelect={handleVerseSelect}
+            toggleAiContext={toggleAiContext}
           />
 
           {currentVerse && (

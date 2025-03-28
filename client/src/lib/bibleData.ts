@@ -2,10 +2,10 @@ import { BibleBook } from "@/lib/types";
 import { apiRequest } from "./queryClient";
 
 // Function to get all Bible books from the server API
-export const getBibleBooks = async (translation: string): Promise<BibleBook[]> => {
+export const getBibleBooks = async (): Promise<BibleBook[]> => {
   try {
     const response = await apiRequest<BibleBook[]>({
-      url: `/api/books/${translation}`,
+      url: "/api/books",
       method: "GET"
     });
     return response || [];
@@ -18,9 +18,8 @@ export const getBibleBooks = async (translation: string): Promise<BibleBook[]> =
 // Function to get all chapters for a book from the server API
 export const getChapters = async (bookId: string): Promise<number[]> => {
   try {
-    // Get chapter count from bible_verse_counts
     const response = await apiRequest<number[]>({
-      url: `/api/chapters/${bookId.toLowerCase()}`,
+      url: `/api/chapters/${bookId}`,
       method: "GET"
     });
     return response || [];
