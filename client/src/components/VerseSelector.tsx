@@ -7,7 +7,7 @@ interface VerseSelectorProps {
   onVerseSelect: (book: string, chapter: number, verse: number) => void;
 }
 
-export function VerseSelector({ translation, onVerseSelect }: VerseSelectorProps) {
+const VerseSelector = ({ translation, onVerseSelect }: VerseSelectorProps) => {
   const [books, setBooks] = useState<BibleBook[]>([]);
   const [selectedBook, setSelectedBook] = useState<string>('');
   const [chapters, setChapters] = useState<number[]>([]);
@@ -105,4 +105,6 @@ export function VerseSelector({ translation, onVerseSelect }: VerseSelectorProps
       </select>
     </div>
   );
-}
+};
+
+export default VerseSelector;
