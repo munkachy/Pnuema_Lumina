@@ -1,23 +1,15 @@
 import { useState } from "react";
 import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import VerseSelector from "@/components/VerseSelector";
 import VerseDisplay from "@/components/VerseDisplay";
 import AiContext from "@/components/AiContext";
 import Footer from "@/components/Footer";
 import { BibleVerse } from "@/lib/types";
-import { useMobile } from "@/hooks/use-mobile";
 
 const Home = () => {
-  const isMobile = useMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-  const [currentTranslation, setCurrentTranslation] = useState<string>("GNT");
+  const [currentTranslation, setCurrentTranslation] = useState<string>("NRSV-CE"); // Changed default to NRSV-CE since GNT was having issues
   const [currentVerse, setCurrentVerse] = useState<BibleVerse | null>(null);
   const [showAiContext, setShowAiContext] = useState<boolean>(false);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   const handleVerseSelect = (verse: BibleVerse) => {
     setCurrentVerse(verse);
@@ -91,14 +83,11 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50">
       <Header
-        toggleSidebar={toggleSidebar}
         currentTranslation={currentTranslation}
         onTranslationChange={handleTranslationChange}
       />
 
       <div className="flex flex-grow">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onSelectBook={() => {}} />
-
         <main className="flex-grow p-4 md:p-6">
           <VerseSelector
             currentTranslation={currentTranslation}

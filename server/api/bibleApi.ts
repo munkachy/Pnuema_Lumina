@@ -93,10 +93,28 @@ const BOOK_ID_MAP: Record<string, string> = {
 
 // Function to clean the verse text by removing the verse number
 const cleanVerseText = (text: string): string => {
-  // First try to match a verse number pattern like "12 " or "3 "
-  const cleaned = text.replace(/^<p>\s*\d+\s+/, '<p>');
-  // If that doesn't work, try just removing any leading numbers with spaces
-  return cleaned.replace(/^\s*\d+\s+/, '');
+  if (!text) return '';
+  
+  // First try to match verse numbers within HTML tags like "<p>12..."
+  let cleaned = text.replace(/^<p>\s*\d+/, '<p>');
+  
+  // Try to match patterns like "12In the beginning" (no space after number)
+  cleaned = cleaned.replace(/^<p>(\d+)([A-Za-z])/, '<p>$2');
+  
+  // If that didn't work (no change), try without the HTML tag
+  if (cleaned === text) {
+    cleaned = text.replace(/^\s*\d+\s*/, '');
+  }
+  
+  // Try matching patterns like "12In the..." (no space after number)
+  if (cleaned === text) {
+    cleaned = text.replace(/^(\d+)([A-Za-z])/, '$2');
+  }
+  
+  // General cleaning of any remnant digit at the beginning
+  cleaned = cleaned.replace(/^(\d+)/, '');
+  
+  return cleaned;
 };
 
 /**

@@ -88,20 +88,18 @@ const AiContext = ({ book, chapter, verse }: AiContextProps) => {
     <Card className="bg-white rounded-lg shadow-sm mb-6 border-l-4 border-secondary">
       <CardHeader className="p-4 flex flex-row items-center justify-between border-b border-gray-200">
         <div className="flex items-center">
-          <Brain className="text-secondary mr-2 h-5 w-5" />
+          <Brain className="text-black mr-2 h-5 w-5" />
           <h3 className="font-medium">AI-Powered Context</h3>
         </div>
         <div className="flex items-center gap-2">
           <Select value={persona} onValueChange={handlePersonaChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[240px]">
               <SelectValue placeholder="Select AI Voice" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="default">Default</SelectItem>
               <SelectItem value="Jesus">Jesus</SelectItem>
               <SelectItem value="Old Testament Typology">OT Typology</SelectItem>
-              <SelectItem value="Koine Greek Expert">Greek Expert</SelectItem>
-              <SelectItem value="Hebrew Expert">Hebrew Expert</SelectItem>
               <SelectItem value="Bishop Barron">Bishop Barron</SelectItem>
               <SelectItem value="C.S. Lewis">C.S. Lewis</SelectItem>
               <SelectItem value="Church Father">Church Father</SelectItem>
@@ -109,8 +107,7 @@ const AiContext = ({ book, chapter, verse }: AiContextProps) => {
               <SelectItem value="Augustine">Augustine</SelectItem>
               <SelectItem value="St. Thomas Aquinas">St. Thomas Aquinas</SelectItem>
               <SelectItem value="theologian">Theologian</SelectItem>
-              <SelectItem value="historian">Historian</SelectItem>
-              <SelectItem value="pastor">Pastor</SelectItem>
+              <SelectItem value="Historical-Critical analysis">Historical-Critical analysis</SelectItem>
               <SelectItem value="custom">Custom Persona...</SelectItem>
             </SelectContent>
           </Select>

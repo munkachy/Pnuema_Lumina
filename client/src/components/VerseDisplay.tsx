@@ -15,21 +15,24 @@ interface VerseDisplayProps {
 const cleanVerseText = (text: string): string => {
   if (!text) return '';
   
-  // First try to match a verse number pattern inside HTML tag like "<p>12 "
-  let cleaned = text.replace(/^<p>\s*\d+\s+/, '<p>');
+  // First try to match verse numbers within HTML tags like "<p>12..."
+  let cleaned = text.replace(/^<p>\s*\d+/, '<p>');
+  
+  // Try to match patterns like "12In the beginning" (no space after number)
+  cleaned = cleaned.replace(/^<p>(\d+)([A-Za-z])/, '<p>$2');
   
   // If that didn't work (no change), try without the HTML tag
   if (cleaned === text) {
-    cleaned = text.replace(/^\s*\d+\s+/, '');
+    cleaned = text.replace(/^\s*\d+\s*/, '');
   }
   
-  // Try matching patterns like "12 " at the beginning of the content
+  // Try matching patterns like "12In the..." (no space after number)
   if (cleaned === text) {
-    const matches = text.match(/^(\d+\s+)(.*)$/);
-    if (matches && matches.length > 2) {
-      cleaned = matches[2];
-    }
+    cleaned = text.replace(/^(\d+)([A-Za-z])/, '$2');
   }
+  
+  // General cleaning of any remnant digit at the beginning
+  cleaned = cleaned.replace(/^(\d+)/, '');
   
   return cleaned;
 };
