@@ -76,20 +76,20 @@ const VerseSelector = ({
   const parseDirectReference = (ref: string): { book: string, chapter: string, verse: string } | null => {
     // Try to match patterns like "John 3:16" or "Genesis 1:1-3" (we'll just take the first verse for ranges)
     const match = ref.match(/^([a-zA-Z0-9\s]+)\s+(\d+):(\d+)(?:-\d+)?$/);
-    
+
     if (!match) return null;
-    
+
     const [, bookName, chapter, verse] = match;
     const book = Object.entries(books || []).find(
       ([, book]) => book.name.toLowerCase() === bookName.trim().toLowerCase()
     )?.[1]?.id;
-    
+
     return book ? { book, chapter, verse } : null;
   };
 
   const handleDirectReferenceSubmit = async () => {
     const parsedRef = parseDirectReference(directReference);
-    
+
     if (!parsedRef) {
       toast({
         title: "Invalid reference",
@@ -98,11 +98,11 @@ const VerseSelector = ({
       });
       return;
     }
-    
+
     setSelectedBook(parsedRef.book);
     setSelectedChapter(parsedRef.chapter);
     setSelectedVerse(parsedRef.verse);
-    
+
     // Now fetch the verse
     try {
       const response = await fetch(
@@ -166,7 +166,7 @@ const VerseSelector = ({
       if (response.ok) {
         const verse = await response.json();
         onVerseSelect(verse);
-        
+
         // Update the selectors to match the random verse
         setSelectedBook(verse.book);
         setSelectedChapter(verse.chapter.toString());
@@ -195,7 +195,7 @@ const VerseSelector = ({
             <TabsTrigger value="dropdown">Dropdown Selection</TabsTrigger>
             <TabsTrigger value="direct">Direct Input</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="dropdown" className="mt-2">
             <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
               {/* Book, Chapter, Verse Selector */}
@@ -256,7 +256,7 @@ const VerseSelector = ({
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="direct" className="mt-2">
             <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
               <div className="flex-grow flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">

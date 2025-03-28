@@ -9,7 +9,7 @@ const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
 // These IDs have been verified to work with the API
 const TRANSLATION_MAP = {
   "GNT": "65eec8e0b60e656b-01", // Good News Translation (Verified ID)
-  "ASV": "685d1470fe4d5c3b-01", // American Standard Version (Byzantine Text with Apocrypha)
+  "ASV": "685d1470fe4d5c3b-01", // American Standard Version
   "DRA": "179568874c45066f-01" // Douay-Rheims (Default)
 };
 
