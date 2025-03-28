@@ -1,9 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { getBibleVerse, getRandomVerse, searchBibleVerses } from "./api/bibleApi";
+import { getBibleVerse, getRandomVerse, searchBibleVerses, getTranslationId } from "./api/bibleApi";
 import { bible_verse_counts, book_name_mapping } from "./util/bibleData";
 import axios from "axios";
+
+const API_BIBLE_URL = "https://api.scripture.api.bible/v1";
+const API_BIBLE_KEY = process.env.API_BIBLE_KEY;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Bible API routes
